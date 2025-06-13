@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Soledago';
+  src: url('/public/fonts/Soledago.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SF Pro Rounded';
+  src: url('/public/fonts/SF-Pro-Rounded-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+} 

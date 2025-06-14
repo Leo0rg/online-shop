@@ -23,6 +23,7 @@ const GlobalStyle = createGlobalStyle`
   }
   
   .container {
+    background-color: white;
     margin: 0 auto;
     padding: 0;
     display: flex;

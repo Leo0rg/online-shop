@@ -25,10 +25,15 @@ router.post('/register', async (req, res) => {
       throw new Error('Пользователь уже существует');
     }
 
+    // Первый зарегистрированный пользователь становится администратором
+    const isFirstAccount = (await User.countDocuments({})) === 0;
+    const role = isFirstAccount ? 'admin' : 'user';
+
     const user = await User.create({
       name,
       email,
       password,
+      role,
     });
 
     if (user) {

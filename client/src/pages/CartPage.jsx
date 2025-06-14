@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
-import { orderAPI } from '../api';
+import { FaArrowUp } from 'react-icons/fa';
 
 const CartContainer = styled.div`
   padding: 2rem 0;
@@ -180,61 +180,55 @@ const CheckoutButton = styled.button`
   }
 `;
 
-const ShippingForm = styled.div`
-  margin-top: 2rem;
-  background-color: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
+const ScrollToTopButton = styled.button`
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  opacity: ${props => props.show ? 1 : 0};
+  visibility: ${props => props.show ? 'visible' : 'hidden'};
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 
-  @media (max-width: 768px) {
-    padding: 1rem;
+  &:hover {
+    background-color: #555;
   }
 `;
 
-const FormTitle = styled.h3`
-  margin-bottom: 1.5rem;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const FormLabel = styled.label`
-  display: block;
-  margin-bottom: 0.5rem;
-`;
-
-const FormInput = styled.input`
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-`;
-
-const Message = styled.div`
-  padding: 1rem;
-  background-color: ${props => props.error ? '#f8d7da' : '#d4edda'};
-  color: ${props => props.error ? '#721c24' : '#155724'};
-  border-radius: 4px;
-  margin: 1rem 0;
-`;
-
 const CartPage = () => {
-  const { cartItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useContext(CartContext);
+  const { cartItems, updateQuantity } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  
-  const [showShippingForm, setShowShippingForm] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState({
-    address: '',
-    city: '',
-    postalCode: '',
-    country: ''
-  });
-  const [paymentMethod, setPaymentMethod] = useState('Наличными при получении');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [showScroll, setShowScroll] = useState(false);
+
+  const checkScrollTop = useCallback(() => {
+    if (!showScroll && window.pageYOffset > 400){
+      setShowScroll(true);
+    } else if (showScroll && window.pageYOffset <= 400){
+      setShowScroll(false);
+    }
+  }, [showScroll]);
+
+  const scrollTop = () => {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', checkScrollTop);
+    return () => {
+      window.removeEventListener('scroll', checkScrollTop);
+    };
+  }, [checkScrollTop]);
 
   const handleQuantityChange = (id, quantity) => {
     updateQuantity(id, quantity);
@@ -245,59 +239,7 @@ const CartPage = () => {
       navigate('/login?redirect=cart');
       return;
     }
-    setShowShippingForm(true);
-  };
-
-  const handleShippingChange = (e) => {
-    const { name, value } = e.target;
-    setShippingAddress(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
-    
-    if (!shippingAddress.address || !shippingAddress.city || 
-        !shippingAddress.postalCode || !shippingAddress.country) {
-      setError('Пожалуйста, заполните все поля адреса доставки');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const orderItems = cartItems.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        image: item.image,
-        price: item.price,
-        product: item.product
-      }));
-      
-      const order = {
-        orderItems,
-        shippingAddress,
-        paymentMethod,
-        totalPrice
-      };
-      
-      await orderAPI.createOrder(order);
-      
-      clearCart();
-      setSuccess('Заказ успешно оформлен!');
-      setLoading(false);
-      
-      setTimeout(() => {
-        navigate('/profile');
-      }, 2000);
-      
-    } catch (err) {
-      setError(err.message || 'Произошла ошибка при оформлении заказа');
-      setLoading(false);
-    }
+    navigate('/checkout');
   };
   
   const apiUrl = process.env.REACT_APP_API_URL || '';
@@ -313,9 +255,6 @@ const CartPage = () => {
         </CartEmpty>
       ) : (
         <>
-          {error && <Message error>{error}</Message>}
-          {success && <Message>{success}</Message>}
-          
           <CartItems>
             {cartItems.map((item, index) => {
                const imageUrl = item.image && item.image.startsWith('/uploads')
@@ -341,13 +280,12 @@ const CartPage = () => {
                     <QuantityDisplay>{item.quantity}</QuantityDisplay>
                     <QuantityButton 
                       onClick={() => handleQuantityChange(item.product, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
                     >
                       -
                     </QuantityButton>
                   </QuantitySelector>
                   
-                  <CartItemPrice>Цена: {item.price} p.</CartItemPrice>
+                  <CartItemPrice>Цена: {item.price} ₽</CartItemPrice>
 
                 </CartItem>
                 {index < cartItems.length - 1 && <ItemSeparator />}
@@ -356,73 +294,15 @@ const CartPage = () => {
           </CartItems>
           
           <CartActions>
-            {!showShippingForm && (
-              <CheckoutButton onClick={handleCheckout} disabled={loading}>
-                {loading ? 'Обработка...' : 'Купить'}
-              </CheckoutButton>
-            )}
+            <CheckoutButton onClick={handleCheckout}>
+              Оформить заказ
+            </CheckoutButton>
           </CartActions>
-
-          {showShippingForm && (
-            <ShippingForm>
-              <FormTitle>Адрес доставки</FormTitle>
-              <form onSubmit={handlePlaceOrder}>
-                <FormGroup>
-                  <FormLabel>Адрес</FormLabel>
-                  <FormInput 
-                    type="text" 
-                    name="address" 
-                    value={shippingAddress.address}
-                    onChange={handleShippingChange}
-                    required
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormLabel>Город</FormLabel>
-                  <FormInput 
-                    type="text" 
-                    name="city" 
-                    value={shippingAddress.city}
-                    onChange={handleShippingChange}
-                    required
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormLabel>Почтовый индекс</FormLabel>
-                  <FormInput 
-                    type="text" 
-                    name="postalCode" 
-                    value={shippingAddress.postalCode}
-                    onChange={handleShippingChange}
-                    required
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormLabel>Страна</FormLabel>
-                  <FormInput 
-                    type="text" 
-                    name="country" 
-                    value={shippingAddress.country}
-                    onChange={handleShippingChange}
-                    required
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormLabel>Способ оплаты</FormLabel>
-                  <FormInput 
-                    type="text" 
-                    value={paymentMethod}
-                    readOnly
-                  />
-                </FormGroup>
-                <CheckoutButton type="submit" disabled={loading}>
-                  {loading ? 'Оформление...' : 'Подтвердить заказ'}
-                </CheckoutButton>
-              </form>
-            </ShippingForm>
-          )}
         </>
       )}
+      <ScrollToTopButton onClick={scrollTop} show={showScroll}>
+        <FaArrowUp />
+      </ScrollToTopButton>
     </CartContainer>
   );
 };

@@ -4,11 +4,10 @@ import styled from 'styled-components';
 import { AuthContext } from '../context/AuthContext';
 
 const LoginContainer = styled.div`
-  max-width: 450px;
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 2rem 6rem;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
+  border-radius: 3rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
@@ -16,6 +15,8 @@ const LoginTitle = styled.h1`
   text-align: center;
   margin-bottom: 2rem;
   color: #343a40;
+  font-family: 'Soledago', sans-serif;
+  font-size: 4rem;
 `;
 
 const Form = styled.form`
@@ -36,8 +37,8 @@ const FormLabel = styled.label`
 const FormInput = styled.input`
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  border: 3px solid #ced4da;
+  border-radius: 3rem;
   font-size: 1rem;
   
   &:focus {
@@ -48,17 +49,17 @@ const FormInput = styled.input`
 `;
 
 const SubmitButton = styled.button`
-  background-color: #007bff;
+  background-color: #D9D9D9;
   color: white;
   border: none;
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 3rem;
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
   
   &:hover {
-    background-color: #0069d9;
+    background-color: #969696;
   }
   
   &:disabled {
@@ -69,9 +70,9 @@ const SubmitButton = styled.button`
 
 const Message = styled.div`
   padding: 1rem;
-  background-color: ${props => props.error ? '#f8d7da' : '#d4edda'};
-  color: ${props => props.error ? '#721c24' : '#155724'};
-  border-radius: 4px;
+  background-color: ${props => props.error ? '#f8d7da' : 'white'};
+  color: ${props => props.error ? '#721c24' : 'white'};
+  border-radius: 3rem;
   margin-bottom: 1rem;
 `;
 
@@ -81,7 +82,7 @@ const RegisterLink = styled.div`
   font-size: 0.9rem;
   
   a {
-    color: #007bff;
+    color:rgb(165, 165, 165);
     text-decoration: none;
     
     &:hover {

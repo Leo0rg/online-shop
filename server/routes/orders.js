@@ -95,14 +95,40 @@ router.get('/:id', protect, async (req, res) => {
 
 // @desc    Обновить статус заказа на "оплачен"
 // @route   PUT /api/orders/:id/pay
-// @access  Private
-router.put('/:id/pay', protect, async (req, res) => {
+// @access  Private/Admin
+router.put('/:id/pay', protect, admin, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
 
     if (order) {
       order.isPaid = true;
       order.paidAt = Date.now();
+
+      const updatedOrder = await order.save();
+
+      res.json(updatedOrder);
+    } else {
+      res.status(404);
+      throw new Error('Заказ не найден');
+    }
+  } catch (error) {
+    res.status(res.statusCode === 200 ? 500 : res.statusCode);
+    res.json({
+      message: error.message,
+    });
+  }
+});
+
+// @desc    Обновить статус заказа на "доставлен"
+// @route   PUT /api/orders/:id/deliver
+// @access  Private/Admin
+router.put('/:id/deliver', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+      order.isDelivered = true;
+      order.deliveredAt = Date.now();
 
       const updatedOrder = await order.save();
 

@@ -94,7 +94,7 @@ const Footer = () => {
           <LinkColumn>
             <ColumnTitle>Магазин</ColumnTitle>
             <FooterLink to="/">Главная</FooterLink>
-            <FooterLink to="/products">Товары</FooterLink>
+            {/* <FooterLink to="/products">Товары</FooterLink> */}
             <FooterLink to="/cart">Корзина</FooterLink>
           </LinkColumn>
           <LinkColumn>

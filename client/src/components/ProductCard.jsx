@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { CartContext } from '../context/CartContext';
 
 const Card = styled.div`
   border: 1px solid transparent;
@@ -47,6 +46,32 @@ const CardPrice = styled.div`
   color: #ACACAC;
 `;
 
+const QuantitySelector = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+`;
+
+const QuantityButton = styled.button`
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0 10px;
+  font-weight: bold;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const QuantityDisplay = styled.span`
+  color: white;
+  font-size: 14px;
+`;
+
 const BuyButton = styled.button`
   background-color:rgb(175, 175, 175);
   color: white;
@@ -70,12 +95,16 @@ const BuyButton = styled.button`
   }
 `;
 
-const ProductCard = ({ product }) => {
-  const { addToCart } = useContext(CartContext);
+const ProductCard = ({ product, onAddToCart, isAdded, cartItem, updateQuantity }) => {
 
   const handleAddToCart = () => {
-    console.log('product',product);
-    addToCart(product, 1);
+    onAddToCart(product);
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    if (cartItem) {
+      updateQuantity(cartItem.product, newQuantity);
+    }
   };
 
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -91,10 +120,23 @@ const ProductCard = ({ product }) => {
         <CardPrice>{product.price} ₽</CardPrice>
       </CardBody>
       <BuyButton 
-        onClick={handleAddToCart}
-        disabled={product.countInStock === 0}
+        onClick={!isAdded ? handleAddToCart : undefined}
+        disabled={!isAdded && product.countInStock === 0}
       >
-        {product.countInStock > 0 ? 'В корзину' : 'Нет в наличии'}
+        {isAdded ? (
+          <QuantitySelector>
+            <QuantityButton onClick={() => handleQuantityChange(cartItem.quantity - 1)}>-</QuantityButton>
+            <QuantityDisplay>{cartItem.quantity} шт.</QuantityDisplay>
+            <QuantityButton 
+              onClick={() => handleQuantityChange(cartItem.quantity + 1)}
+              disabled={cartItem.quantity >= product.countInStock}
+            >
+              +
+            </QuantityButton>
+          </QuantitySelector>
+        ) : (
+          product.countInStock > 0 ? 'В корзину' : 'Нет в наличии'
+        )}
       </BuyButton>
     </Card>
   );

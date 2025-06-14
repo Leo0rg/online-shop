@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaShoppingCart, FaUser, FaBars } from 'react-icons/fa';
-import { RiVipDiamondFill } from "react-icons/ri";
-import { AuthContext } from '../context/AuthContext';
+import { FaShoppingCart, FaUser, FaBars, FaCog } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 
 const HeaderContainer = styled.header`
@@ -92,7 +91,7 @@ const Hamburger = styled.div`
 `;
 
 const Header = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   const { cartItems } = useContext(CartContext);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -106,10 +105,6 @@ const Header = () => {
           <FaBars />
         </Hamburger>
         <NavLinks menuOpen={menuOpen}>
-          <NavLink to="/products" onClick={() => setMenuOpen(false)}>
-            <RiVipDiamondFill style={{ marginRight: '0.5rem' }} />
-            Товары
-          </NavLink>
           <NavLink to="/cart" onClick={() => setMenuOpen(false)}>
             <FaShoppingCart style={{ marginRight: '0.5rem' }} />
             Корзина
@@ -118,6 +113,12 @@ const Header = () => {
           
           {user ? (
             <>
+              {user.role === 'admin' && (
+                <NavLink to="/admin/products" onClick={() => setMenuOpen(false)}>
+                  <FaCog style={{ marginRight: '0.5rem' }} />
+                  Админка
+                </NavLink>
+              )}
               <NavLink to="/profile" onClick={() => setMenuOpen(false)}>
                 <FaUser style={{ marginRight: '0.5rem' }} />
                 Профиль

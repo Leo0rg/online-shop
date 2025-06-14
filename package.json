@@ -7,7 +7,9 @@
     "preclient": "grep '^REACT_APP_' .env > client/.env || true",
     "client": "cd client && yarn start",
     "server": "cd server && yarn dev",
-    "dev": "concurrently \"yarn server\" \"yarn client\""
+    "dev": "concurrently \"yarn server\" \"yarn client\"",
+    "start": "concurrently \"cd server && yarn start\" \"cd client && yarn start\"",
+    "build": "cd client && yarn build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
